@@ -1,3 +1,43 @@
 1) 허명회 (2008), 선거여론조사결과의 베이즈적 해석: 저널리즘과 아카데미즘의 조화
 
 - 2020.02.04
+
+0. abstract
+두 명의 후보 A와 B가 경합하는 선거에서 n명의 유권자를 확률 표집하여 조사한 결과 후보A와 후보B에 대한 지지도가 P_A, P_B로 나왔다고 하자. 이 지지도의 차이가 오차범위 내에 있는 경우 ‘오차범위 내에서 한 후보가 다른 후보를 앞서고 있다’라는 표현은 통계적으로 의미있는 차이가 아니므로 적절하지 않다고 본다. 이런 상황의 결과를 베이즈적 관점으로 해석하면서 언론보도에 활용할 것을 제안한다.
+
+1절. 베이즈적 관점
+- 베이즈학파의 패러다임 : 관측자료를 활용하여 추론 대상에 대한 연구자의 prior information을 posterior information으로 변환해 내는것.
+- 추론대상을 theta로, 관측자료 y가 확률 메커니즘 f(y|theta)로부터 생성된다는 전제하에, 관측자료를 얻은 이후 연구자는 theta에 대한 정보(또는 믿음)을 업데이트 한다.
+- Jackson, S. (2004). Bayesian analysis for political research. 참고
+
+2절. 2인 경합의 경우
+- theta ~ Dirichlet(alpha),  y|theat ~ Multinomial(theta)에 대하여 
+  theta|y ~ Dirichlet(y + alpha)
+- A의 승리 가능성(선두 확률, chance of winning)은 
+  사후적 확률 P(theta_A >= theta_B | n_A, n_B, n_D) ≡ w_A,B이다.
+  이것은 Monte Carlo 알고리즘 또는 정규근사로 확인할 수 있다.
+  (1) (theta들)을 Dirichlet(n_A+1, n_B+1, n_D+1)로부터 생성한다.
+  (2) theta_A >= theta_B이면 지시변수 V를 1로 놓고, 그렇지않으면 0으로 둔다.
+  (3) 이 두 단계를 N(=1000000)번 반복하여 V의 평균을 낸다.
+- P_A=0.251, P_B=0.221정도의 3%p 차이를 보이는 경합 후보들을 위의 방법으로 계산시, A가 B에 앞설 가능성이 80%를 넘는다고 말하는 것이 가능하다.
+- R 코드
+library(lattice); library(coda); library(MCMCpack)
+## 이명박 vs 박근혜 (2절)
+n <- 700; nrepeat <- 1000000
+p <- c(0.251, 0.221, 0.528)
+alpha <- n*p + 1
+theta <- rdirichlet(nrepeat,alpha)
+round(mean((theta[,1]>theta[,2])),3)
+## 이명박 vs 박근혜 (3절)
+p <- c(0.251, 0.221, 0.207, 0.321)
+alpha <- n*p + 1
+theta <- rdirichlet(nrepeat,alpha)
+round(mean((theta[,1]>theta[,2])&(theta[,1] > theta[,3])),3)
+round(mean((theta[,2] > theta[,3])),3)
+
+
+3절. 3인 이상의 경우
+- 위의 과정과 별 차이 없음
+
+4절. 맺음말
+- 베이즈적 해석은 언론보도 결과를 보다 흥미롭게 할 수 있다.
